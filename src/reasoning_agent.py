@@ -148,7 +148,7 @@ def get_verdict(ticker: str, move: dict, evidence: list[dict]) -> dict:
       - If neither key is set, falls back to a rule-based mock verdict.
     """
     forced_provider = os.getenv("LLM_PROVIDER", "").lower()
-    gemini_key = os.getenv("GEMINI_API_KEY")
+    gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip()
     groq_key = os.getenv("GROQ_API_KEY")
 
     if forced_provider == "gemini" or (not forced_provider and gemini_key):
