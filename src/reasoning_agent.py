@@ -108,19 +108,40 @@ def _parse_verdict_json(raw: str) -> dict:
         }
 
 
-def _get_verdict_gemini(ticker: str, move: dict, evidence: list[dict], api_key: str) -> dict:
+def _get_verdict_gemini(ticker: str, move: dict, evidence: list[dict], api_key: str,
+                         max_retries: int = 3) -> dict:
+    import time
+
     import google.generativeai as genai
+    from google.api_core.exceptions import ResourceExhausted
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(
         model_name=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
         system_instruction=SYSTEM_PROMPT,
     )
-    response = model.generate_content(
-        _build_user_prompt(ticker, move, evidence),
-        generation_config={"temperature": 0.2, "response_mime_type": "application/json"},
-    )
-    return _parse_verdict_json(response.text)
+
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(
+                _build_user_prompt(ticker, move, evidence),
+                generation_config={"temperature": 0.2, "response_mime_type": "application/json"},
+            )
+            return _parse_verdict_json(response.text)
+        except ResourceExhausted:
+            if attempt < max_retries - 1:
+                wait_seconds = 2 ** (attempt + 1)  # 2s, 4s, 8s
+                time.sleep(wait_seconds)
+            else:
+                # Retries exhausted - degrade gracefully rather than crashing the pipeline,
+                # clearly labeled so it's never mistaken for a real reasoning verdict.
+                return {
+                    "caused_by": "noise",
+                    "confidence": 0.0,
+                    "explanation": "[RATE_LIMITED] Gemini free-tier quota exhausted after "
+                                    f"{max_retries} retries. Verdict skipped, not fabricated.",
+                    "contradicting_evidence": "n/a - no reasoning was performed for this move",
+                }
 
 
 def _get_verdict_groq(ticker: str, move: dict, evidence: list[dict], api_key: str) -> dict:
@@ -148,7 +169,7 @@ def get_verdict(ticker: str, move: dict, evidence: list[dict]) -> dict:
       - If neither key is set, falls back to a rule-based mock verdict.
     """
     forced_provider = os.getenv("LLM_PROVIDER", "").lower()
-    gemini_key = os.getenv("GEMINI_API_KEY")
+    gemini_key = (os.getenv("GEMINI_API_KEY")or "").strip()
     groq_key = os.getenv("GROQ_API_KEY")
 
     if forced_provider == "gemini" or (not forced_provider and gemini_key):

@@ -9,10 +9,12 @@ Then, separately, run_backtest() scores all logged verdicts against actual
 subsequent price action and prints the eval metrics.
 """
 
+import time
+
 import mlflow
 from dotenv import load_dotenv
 
-load_dotenv() # populates os.environ from .env
+load_dotenv()  # populates os.environ from .env - this was missing before
 
 from src.price_tool import get_price_history, compute_moves
 from src.news_tool import get_news, news_near_timestamp
@@ -22,6 +24,10 @@ from src.backtest import VerdictRecord, score_records, compute_metrics
 
 TRACKED_TICKERS = ["AAPL", "BTC"]
 
+# Small pause between consecutive reasoning calls so a run with several
+# moves doesn't burst past Gemini's free-tier requests-per-minute limit.
+SECONDS_BETWEEN_CALLS = 4
+
 
 def process_ticker(ticker: str) -> list[VerdictRecord]:
     price_history = get_price_history(ticker)
@@ -29,7 +35,10 @@ def process_ticker(ticker: str) -> list[VerdictRecord]:
     moves = compute_moves(price_history)
 
     records = []
-    for move in moves:
+    for i, move in enumerate(moves):
+        if i > 0:
+            time.sleep(SECONDS_BETWEEN_CALLS)
+
         evidence = news_near_timestamp(news, move["timestamp"])
         verdict = get_verdict(ticker, move, evidence)
 
@@ -77,4 +86,3 @@ if __name__ == "__main__":
     metrics = run_backtest(results)
     for k, v in metrics.items():
         print(f"  {k}: {v}")
-
