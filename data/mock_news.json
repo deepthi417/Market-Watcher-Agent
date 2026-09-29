@@ -1,0 +1,56 @@
+{
+  "AAPL": [
+    {
+      "timestamp": "2026-09-20T10:15:00Z",
+      "headline": "Apple beats Q3 estimates, iPhone revenue up 12% YoY",
+      "source": "Reuters"
+    },
+    {
+      "timestamp": "2026-09-20T14:30:00Z",
+      "headline": "Analysts raise Apple price target after strong earnings call",
+      "source": "Bloomberg"
+    },
+    {
+      "timestamp": "2026-09-21T11:00:00Z",
+      "headline": "Broader tech selloff as Treasury yields climb",
+      "source": "CNBC"
+    },
+    {
+      "timestamp": "2026-09-22T09:00:00Z",
+      "headline": "Apple supplier reports minor production delay, impact unclear",
+      "source": "Reuters"
+    },
+    {
+      "timestamp": "2026-09-23T13:00:00Z",
+      "headline": "Markets flat ahead of Fed commentary",
+      "source": "WSJ"
+    }
+  ],
+  "BTC": [
+    {
+      "timestamp": "2026-09-20T02:00:00Z",
+      "headline": "Large exchange reports withdrawal delays, users report anxiety",
+      "source": "CoinDesk"
+    },
+    {
+      "timestamp": "2026-09-20T20:00:00Z",
+      "headline": "Bitcoin dips amid broader risk-off sentiment in equities",
+      "source": "CoinDesk"
+    },
+    {
+      "timestamp": "2026-09-21T06:00:00Z",
+      "headline": "Major asset manager files for spot Bitcoin ETF expansion",
+      "source": "Bloomberg"
+    },
+    {
+      "timestamp": "2026-09-22T10:00:00Z",
+      "headline": "On-chain data shows accumulation by long-term holders",
+      "source": "CoinDesk"
+    },
+    {
+      "timestamp": "2026-09-23T05:00:00Z",
+      "headline": "Regulatory clarity bill advances in committee vote",
+      "source": "Reuters"
+    }
+  ]
+}
